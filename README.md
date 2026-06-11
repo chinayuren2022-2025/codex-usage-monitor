@@ -17,6 +17,18 @@
 powershell -NoProfile -File "scripts\install-shortcut.ps1"
 ```
 
+## 点击即用（macOS）
+
+双击 **`Start-Monitor.command`**，会弹一个终端窗口、自动选空闲端口启动并打开浏览器。
+**关掉那个终端窗口（或按 Ctrl-C）就停止监控**。
+
+- 第一次双击若报「未识别的开发者」/「无法打开」：右键点它 → **打开** → 在弹窗里再点**打开**（只需一次）。
+- 如果双击没反应（可执行位丢了，常见于解压 zip 后），在终端里跑一次即可恢复：
+  ```bash
+  chmod +x Start-Monitor.command
+  ```
+  或者直接 `bash Start-Monitor.command` 运行。
+
 ## 命令行运行
 
 ```bash
@@ -31,8 +43,11 @@ npm run report         # 不开网页，直接终端打印报表
 ## 分享给拼车队友
 
 把整个 `codex-usage-monitor` 文件夹拷给对方即可（每人看自己机器的用量）。
-对方需要装 [Node.js](https://nodejs.org)，然后双击 `Start-Monitor.cmd`，
-首次会自己在桌面建快捷方式。无需 `npm install`（零依赖）。
+对方需要装 [Node.js](https://nodejs.org)，然后：
+- **Windows**：双击 `Start-Monitor.cmd`（首次会自己在桌面建快捷方式）。
+- **macOS**：双击 `Start-Monitor.command`（首次右键→打开授权一次；解压后若双击无反应，`chmod +x Start-Monitor.command`）。
+
+无需 `npm install`（零依赖）。
 
 ## 看什么
 

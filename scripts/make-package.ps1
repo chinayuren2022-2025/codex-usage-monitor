@@ -17,7 +17,8 @@ New-Item -ItemType Directory -Force -Path $stage | Out-Null
 Copy-Item (Join-Path $proj "src")     $stage -Recurse
 Copy-Item (Join-Path $proj "public")  $stage -Recurse
 Copy-Item (Join-Path $proj "scripts") $stage -Recurse
-Copy-Item (Join-Path $proj "Start-Monitor.cmd") $stage
+Copy-Item (Join-Path $proj "Start-Monitor.cmd")     $stage
+Copy-Item (Join-Path $proj "Start-Monitor.command") $stage
 Copy-Item (Join-Path $proj "package.json")      $stage
 Copy-Item (Join-Path $proj "README.md")         $stage
 

@@ -1,0 +1,5 @@
+# Shell launchers must stay LF, or macOS/Linux bash reports "bad interpreter".
+*.command text eol=lf
+*.sh      text eol=lf
+# Windows batch must stay CRLF.
+*.cmd     text eol=crlf

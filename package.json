@@ -1,0 +1,18 @@
+{
+  "name": "codex-usage-monitor",
+  "version": "0.1.0",
+  "description": "Local web dashboard for monitoring Codex token consumption on this machine (for shared-account / 拼车 quota monitoring). Reads ~/.codex/sessions/**/*.jsonl.",
+  "type": "module",
+  "bin": {
+    "codex-usage-monitor": "src/server.mjs"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "report": "node src/cli.mjs",
+    "package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-package.ps1"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

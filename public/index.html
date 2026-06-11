@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Codex 用量监控</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%E2%8F%A3%3C/text%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="logo">⏣</span>
+        <div>
+          <h1>Codex 用量监控</h1>
+          <div class="sub" id="machine">加载中…</div>
+        </div>
+      </div>
+      <div class="status">
+        <span id="refresh-dot" class="dot"></span>
+        <span id="refresh-text">连接中…</span>
+      </div>
+    </header>
+
+    <main id="app">
+      <div class="account-bar">
+        <span class="account-bar-label">账号</span>
+        <div class="account-tabs" id="account-tabs"></div>
+      </div>
+
+      <div class="section-head">
+        <h2>额度窗口（本机使用量）</h2>
+        <div class="unit-toggle" id="unit-toggle" title="切换单位：额度百分比 / 原始 token">
+          <button data-unit="percent">额度 %</button>
+          <button data-unit="token">token</button>
+        </div>
+      </div>
+      <section class="grid windows" id="windows"></section>
+
+      <section class="grid stats" id="stats"></section>
+
+      <section class="card chart-card">
+        <div class="card-head">
+          <h2>每日用量（近 30 天 · 计费 token）</h2>
+          <span class="hint" id="chart-max"></span>
+        </div>
+        <div class="chart" id="chart"></div>
+      </section>
+
+      <section class="grid breakdown">
+        <div class="card">
+          <div class="card-head"><h2>按项目</h2><span class="hint">本机消耗</span></div>
+          <div class="bars" id="byProject"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>按模型</h2><span class="hint">本机消耗</span></div>
+          <div class="bars" id="byModel"></div>
+        </div>
+      </section>
+
+      <footer id="foot"></footer>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

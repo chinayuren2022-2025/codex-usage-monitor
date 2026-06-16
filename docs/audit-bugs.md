@@ -56,6 +56,8 @@ weekly: w(${fmt(kWeekly)} * 20, "derived")
 
 **优先级**：高（用户照抄会写错标定）
 
+**状态**：✅ 已修复（commit `b43b241`）。注意：原 audit 建议的 `toLocaleString("en-US")` 会输出逗号分组 `w(7,700,000, "validated")`，粘进 `calibration.mjs` 反而被解析成 `w(7, 700, 0, …)` → `tokensPerPercent = 7`，引入了比原 bug 更糟的回归。最终改用下划线分组 `w(7_700_000, "validated")`（合法 JS 数字分隔符，与 `calibration.mjs` 自身风格一致），并 round-trip 验证。
+
 ---
 
 ## 5. receiver.mjs 上传错误时调用了 `ws.close()`
@@ -132,6 +134,8 @@ try { fs.unlinkSync(filePath); } catch {}
 **现象**：`#!/bin/bash`。macOS 默认 shell 是 zsh，虽然 bash 仍预装，但未来版本可能移除。用 `#!/bin/sh` 更稳（脚本里没有 bash 特有语法）。
 
 **优先级**：低
+
+**状态**：✅ 已修复（commit `b43b241`）。更正 audit 原判断：脚本里其实**有** bash 特有语法——`read -r -p "…"` 的 `-p` 提示符不是 POSIX，只是因为 macOS `/bin/sh` 恰好是 bash 才没暴露。光改 shebang 反而是隐藏回归（遇到真正的 POSIX shell 会废）。最终改成 POSIX 写法 `printf "…" && read -r _`，并用 `dash -n` 严格校验通过、确认 0 处 bashism。
 
 ---
 

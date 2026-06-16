@@ -84,3 +84,8 @@ sidecar = 随包携带的 node 运行时（externalBin）+ src/、public/（reso
 - 2026-06-16 — S1 首次安装退出码 1。读 VS 安装器日志确认：本次只是 VS Installer 自更新
   （4.4→4.7）+ 注册服务，**VCTools 工作负载未真正安装**（vswhere 无实例、无 `link.exe`）。
   属干净机器首装的「安装器自更新打架」，需用最新安装器**再跑一次**（这次才真正下 ~3–5GB）。
+- 2026-06-16 — S1 第二次（`--passive`）仍 exit 1：setup 跑 13s 秒退、未下载 workload，
+  包缓存仅 60MB、无进程、无 `link.exe`。判定为**提权失败**（探测确认当前 shell 非管理员；
+  `--passive` 安装需 UAC）。MSVC 命令行安装连续两次受阻 → 触发计划中的兜底条件。
+  **决定点**：要么用 VS Installer GUI 手动勾「使用 C++ 的桌面开发」（提权最可靠），
+  要么切 **SEA 兜底**（零安装、立刻出免装-Node 的 .exe，UI 仍为浏览器）。等用户拍板。

@@ -26,9 +26,24 @@ test -f dist/CodexMonitor || { echo "ERROR: dist/CodexMonitor was not produced â
 
 echo "[4/5] assembling ${APP}â€¦"
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp dist/CodexMonitor "$APP/Contents/MacOS/CodexMonitor"
 chmod +x "$APP/Contents/MacOS/CodexMonitor"
+
+# Build AppIcon.icns from assets/icon.png (sips + iconutil are stock macOS tools).
+if [ -f assets/icon.png ] && command -v iconutil >/dev/null 2>&1; then
+  echo "      generating AppIcon.icns from assets/icon.png"
+  ICONSET="$(mktemp -d)/AppIcon.iconset"
+  mkdir -p "$ICONSET"
+  for sz in 16 32 128 256 512; do
+    sips -z $sz $sz assets/icon.png --out "$ICONSET/icon_${sz}x${sz}.png" >/dev/null
+    sips -z $((sz*2)) $((sz*2)) assets/icon.png --out "$ICONSET/icon_${sz}x${sz}@2x.png" >/dev/null
+  done
+  iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns" || echo "WARN: iconutil failed; app will use default icon"
+else
+  echo "WARN: assets/icon.png or iconutil missing; app will use default icon"
+fi
+
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -40,6 +55,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>CFBundleShortVersionString</key><string>0.1.0</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleExecutable</key><string>CodexMonitor</string>
+  <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>LSMinimumSystemVersion</key><string>11.0</string>
 </dict></plist>
 PLIST

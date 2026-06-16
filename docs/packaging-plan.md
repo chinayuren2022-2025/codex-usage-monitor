@@ -89,6 +89,13 @@ sidecar = 随包携带的 node 运行时（externalBin）+ src/、public/（reso
 工作负载（用 VS Installer GUI 勾「使用 C++ 的桌面开发」最稳），装好即可回到 Tauri 路线。
 ② 未代码签名（SmartScreen/Gatekeeper 首次放行一次）。③ macOS `.dmg` 脚本未在 Mac 实测。
 
+**图标（2026-06-16）**：用户出的 `icon.png`（圆环额度表）原图四角是白的（24bpp 无 alpha），
+已用圆角矩形 alpha 蒙版裁成透明角、存为 `assets/icon.png`（1024 ARGB，已入库）。
+`build-sea.mjs` 用 `png-to-ico`+`rcedit`（build-only devDeps）给 exe 打图标 + 版本元数据
+（ProductName=Codex Usage Monitor，任务管理器不再显示 Node.js）。实测：32×32 提取确为本图标、
+版本元数据正确、打完图标后 exe 仍正常起服务（`/`200、`/api/usage`200）。
+macOS 侧 `build-macos.sh` 用 `sips`+`iconutil` 生成 `AppIcon.icns` 进 `.app`（未在 Mac 实测）。
+
 注：`dist/` 与 `node_modules/` 已在 `.gitignore`，~80MB 的 exe 不入库；交付物在本机 `dist/` + 说明。
 
 **SEA 执行结果**：

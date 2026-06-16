@@ -9,6 +9,8 @@
 // machine. public/ is embedded into the binary as SEA assets (see src/server.mjs).
 import { build } from "esbuild";
 import { inject } from "postject";
+import pngToIco from "png-to-ico";
+import { rcedit } from "rcedit";
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -72,6 +74,27 @@ fs.copyFileSync(process.execPath, outExe);
 // macOS rejects a modified signed binary; strip the signature before injecting.
 if (isMac) {
   try { execFileSync("codesign", ["--remove-signature", outExe], { stdio: "inherit" }); } catch {}
+}
+
+// 4b. Windows: stamp the app icon + version metadata onto the exe (rcedit). The
+//     icon source lives in assets/; macOS gets its icon via build-macos.sh.
+const iconPng = path.join(root, "assets", "icon.png");
+if (isWin && fs.existsSync(iconPng)) {
+  console.log("      stamping icon + metadata (rcedit)");
+  const icoPath = path.join(seaDir, "icon.ico");
+  fs.writeFileSync(icoPath, await pngToIco(iconPng));
+  await rcedit(outExe, {
+    icon: icoPath,
+    "file-version": "0.1.0.0",
+    "product-version": "0.1.0.0",
+    "version-string": {
+      ProductName: "Codex Usage Monitor",
+      FileDescription: "Codex Usage Monitor",
+      CompanyName: "codex-usage-monitor",
+      LegalCopyright: "MIT",
+      OriginalFilename: exeName,
+    },
+  });
 }
 
 // 5. Inject the blob into the binary copy.

@@ -3,7 +3,7 @@
 // Scans ~/.codex/sessions/**/*.jsonl, extracts token_count + session_meta,
 // gzips, and POSTs to a receiver server.
 //
-// Double-click export-send.cmd on Windows, or:
+// Double-click export-send.cmd (Windows) or export-send.command (macOS), or:
 //   node export-send.mjs                    → upload to default receiver
 //   node export-send.mjs --local            → save to Desktop, skip upload
 //   node export-send.mjs --server=1.2.3.4   → upload to custom receiver
@@ -15,6 +15,7 @@ import path from "node:path";
 import readline from "node:readline";
 import zlib from "node:zlib";
 import https from "node:https";
+import { execSync } from "node:child_process";
 
 // ===== config =====
 const RECEIVER_URL = "https://47.122.119.25/codex-export";
@@ -149,10 +150,26 @@ function upload(buffer, machineId, host, user) {
 const [machineId, host, user] = (() => {
   let id, h, u;
   try { id = fs.readFileSync(path.join(codexHome(), "installation_id"), "utf8").trim().slice(0, 12); } catch { id = "unknown"; }
-  try { h = os.hostname(); } catch { h = "unknown"; }
-  try { u = os.userInfo().username; } catch { u = "unknown"; }
+  try { h = os.hostname().replace(/[^a-zA-Z0-9_-]/g, "_"); } catch { h = "unknown"; }
+  try { u = os.userInfo().username.replace(/[^a-zA-Z0-9_-]/g, "_"); } catch { u = "unknown"; }
   return [id, h, u];
 })();
+
+// Try to find the user's Desktop directory in a cross-platform way.
+function desktopDir() {
+  if (process.platform === "win32") {
+    return path.join(os.homedir(), "Desktop");
+  }
+  // macOS / Linux: "Desktop" is the default, but localized systems may differ.
+  // Use osascript on macOS to get the real Desktop path when possible.
+  if (process.platform === "darwin") {
+    try {
+      const p = execSync("osascript -e 'POSIX path of (path to desktop folder)'", { encoding: "utf8", timeout: 5000 }).trim();
+      if (p) return p;
+    } catch {}
+  }
+  return path.join(os.homedir(), "Desktop");
+}
 
 async function main() {
   console.log("");
@@ -222,7 +239,7 @@ async function main() {
   // 5a. Local-only mode
   const outName = `codex-export-${host}-${machineId}-${Date.now()}.json.gz`;
   if (ARG_LOCAL) {
-    const outPath = path.join(os.homedir(), "Desktop", outName);
+    const outPath = path.join(desktopDir(), outName);
     fs.writeFileSync(outPath, compressed);
     console.log(`\n  ${C.green}${C.bold}Done!${C.reset}`);
     console.log(`  Saved to Desktop: ${path.basename(outPath)}`);
@@ -241,7 +258,7 @@ async function main() {
   } catch (e) {
     console.log(`\n${stamp()} ${C.red}Upload failed:${C.reset} ${e.message}`);
     // Fallback: save to Desktop
-    const fallback = path.join(os.homedir(), "Desktop", outName);
+    const fallback = path.join(desktopDir(), outName);
     fs.writeFileSync(fallback, compressed);
     console.log(`${stamp()} ${C.yellow}Saved to Desktop as fallback:${C.reset} ${path.basename(fallback)}`);
     console.log(`\n  ${C.yellow}Upload failed, but the exported file is on your Desktop.${C.reset}`);

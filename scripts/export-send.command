@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Double-click launcher for macOS (Finder runs .command files in Terminal).
 # Exports your Codex usage data and sends it to the calibration server.
 cd "$(dirname "$0")" || exit 1

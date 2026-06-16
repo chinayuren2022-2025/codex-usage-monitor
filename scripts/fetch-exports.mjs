@@ -137,7 +137,7 @@ async function main() {
   }
 
   console.log(`\n  ${C.green}${C.bold}Done!${C.reset} Files saved in ${OUT_DIR}/`);
-  console.log(`  Use: node src/anchor-snap.mjs --import=<file> to analyze.\n`);
+  console.log(`  Use: node scripts/analyze-export.mjs <file> to analyze.\n`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

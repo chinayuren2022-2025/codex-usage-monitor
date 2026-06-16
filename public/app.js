@@ -63,7 +63,7 @@ function machineBar(machinePoints, stale) {
   </div>`;
 }
 
-function windowCard(title, machineLabel, w, provisional) {
+function windowCard(title, machineLabel, w) {
   if (!w) return `<div class="card"><div class="window-title">${title}</div><div class="hint">暂无数据</div></div>`;
   const acc = w.account;
   const pct = acc ? acc.usedPercent : null;
@@ -95,7 +95,7 @@ function windowCard(title, machineLabel, w, provisional) {
     // the estimate marker always rides with the percentage, never the token count.
     // source: measured (实测) | validated (已验证) | derived (按套餐倍数推算) | rough (比值法粗标定)
     const src = a.source;
-    const estLabel = src === "rough" ? "粗标" : src === "derived" ? "推算" : src === "validated" ? "已验证" : "估算";
+    const estLabel = src === "rough" ? "粗标" : src === "derived" ? "推算" : src === "validated" ? "已验证" : "实测";
     const pctStr = `${a.machinePoints.toFixed(a.machinePoints < 10 ? 1 : 0)}%`;
     const tokStr = fmt(a.machineTotal);
     if (unitMode === "token") {
@@ -114,8 +114,8 @@ function windowCard(title, machineLabel, w, provisional) {
       tag = `<span class="tag" title="该窗口额度为粗标定（比值法，约±40%），会随用量自动收紧">粗标定</span>`;
     else if (src === "derived")
       tag = `<span class="tag" title="该档额度由 Plus 按套餐倍数推算，未在本机独立测量">倍数推算</span>`;
-    else if (provisional)
-      tag = `<span class="tag" title="换算系数为标定估算：接近标定用量时最准，偏离会漂移">额度为估算</span>`;
+    else if (src === "measured")
+      tag = `<span class="tag" title="该档额度在本机独立标定">实测</span>`;
   } else if (a) {
     // Account tier has no calibration: tokens are exact, but no token->% mapping.
     const tokStr = fmt(a.machineTotal);
@@ -220,8 +220,8 @@ function render(d) {
 
   // windows
   document.getElementById("windows").innerHTML =
-    windowCard("5 小时额度窗口", "本机近 5 小时 ", d.windows.fiveHour, false) +
-    windowCard("每周额度窗口", "本机近 7 天 ", d.windows.weekly, true);
+    windowCard("5 小时额度窗口", "本机近 5 小时 ", d.windows.fiveHour) +
+    windowCard("每周额度窗口", "本机近 7 天 ", d.windows.weekly);
 
   // stats
   const t = d.totals;

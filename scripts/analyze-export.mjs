@@ -182,9 +182,10 @@ if (warnings.length) {
 // Summary: what to put in calibration.mjs
 if (kRatio && planType === "pro") {
   const pool = kRatio * 100;
+  const k5hRounded = Math.round(kRatio / 1000) * 1000;
   console.log(`  ${C.green}${C.bold}For calibration.mjs — pro tier:${C.reset}`);
-  console.log(`  5h: w(${Math.round(kRatio / 1000)}_000, "rough")   // pool ~${fmt(pool)}`);
-  console.log(`  weekly: w(${fmt(kWeekly)} * 20, "derived")          // unchanged`);
+  console.log(`  5h: w(${k5hRounded.toLocaleString("en-US")}, "validated")   // pool ~${fmt(pool)}`);
+  console.log(`  weekly: w(${Math.round(kWeekly).toLocaleString("en-US")}, "derived")          // unchanged`);
   console.log("");
 }
 

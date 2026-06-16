@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Double-click launcher for macOS (Finder runs .command files in Terminal).
 # Close the Terminal window (or press Ctrl-C) to stop monitoring.
 cd "$(dirname "$0")" || exit 1

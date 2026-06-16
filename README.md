@@ -43,11 +43,11 @@ npm run report         # 不开网页，直接终端打印报表
 ## 分享给拼车队友
 
 把整个 `codex-usage-monitor` 文件夹拷给对方即可（每人看自己机器的用量）。
-对方需要装 [Node.js](https://nodejs.org)，然后：
+
 - **Windows**：双击 `Start-Monitor.cmd`（首次会自己在桌面建快捷方式）。
 - **macOS**：双击 `Start-Monitor.command`（首次右键→打开授权一次；解压后若双击无反应，`chmod +x Start-Monitor.command`）。
 
-无需 `npm install`（零依赖）。
+如果系统还没有 Node.js，双击启动器时会**自动打开 Node.js 下载页**，安装后重新双击即可。无需 `npm install`（零依赖）。
 
 ## 看什么
 

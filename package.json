@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node src/server.mjs",
     "report": "node src/cli.mjs",
-    "package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-package.ps1"
+    "package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-package.ps1",
+    "package:export": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-export-package.ps1"
   },
   "engines": {
     "node": ">=20"

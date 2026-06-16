@@ -266,7 +266,7 @@ export function aggregate(sessions, { dailyDays = 30, account = null } = {}) {
       total: a.total,
       lastUsed: a.lastMs ? new Date(a.lastMs).toISOString() : null,
       calibratedTier: !!CALIBRATION.tiers[a.account],
-      calibrationSource: CALIBRATION.tiers[a.account]?.source || null, // measured | derived | null
+      calibrationSource: CALIBRATION.tiers[a.account]?.source || null, // measured | validated | derived | null
     })),
     selectedAccount: viewed,
     calibrated,

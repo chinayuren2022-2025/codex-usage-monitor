@@ -48,6 +48,12 @@ function handleUpload(req, res) {
   const machineId = (req.headers["x-machine-id"] || "unknown").slice(0, 16).replace(/[^a-zA-Z0-9_-]/g, "_");
   const dateStr = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
   const filename = `codex-export-${machineId}-${dateStr}.json.gz`;
+  if (filename.length > 200) {
+    res.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("Bad filename: too long");
+    log("Upload rejected: filename too long");
+    return;
+  }
   const filePath = path.join(DATA_DIR, filename);
 
   let bytes = 0;
@@ -67,7 +73,7 @@ function handleUpload(req, res) {
   });
 
   req.on("error", (e) => {
-    ws.close();
+    ws.destroy();
     try { fs.unlinkSync(filePath); } catch {}
     log(`Upload error: ${e.message}`);
     if (!res.headersSent) {
@@ -75,6 +81,15 @@ function handleUpload(req, res) {
       res.end("Upload failed");
     }
   });
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function serveIndex(res) {
@@ -126,7 +141,7 @@ ${
 ${files
   .map(
     (f) => `<tr>
-  <td><code>${f.name}</code></td>
+  <td><code>${escapeHtml(f.name)}</code></td>
   <td class="size">${fmtSize(f.size)}</td>
   <td>${f.mtime.toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" })}</td>
   <td><a href="${B}/download/${encodeURIComponent(f.name)}">⬇ Download</a></td>

@@ -13,14 +13,21 @@ import { aggregate } from "./aggregate.mjs";
 
 // When packaged as a single-file executable (Node SEA), the public/ assets are
 // embedded into the binary; otherwise (npm start) they are read from disk.
-// Load node:sea synchronously (no top-level await — this file is bundled to CJS
-// for the exe) and guard it so older Node without SEA still runs `npm start`.
+// In the bundled exe this file is CJS, where `require` exists directly and
+// `import.meta.url` is empty; under `npm start` it is ESM. Handle both, and
+// guard so older Node without SEA still runs `npm start`.
 let sea = null;
-try { sea = createRequire(import.meta.url)("node:sea"); } catch { /* no SEA */ }
+try {
+  const req = typeof require === "function" ? require : createRequire(import.meta.url);
+  sea = req("node:sea");
+} catch { /* no SEA available */ }
 const IS_SEA = !!(sea && sea.isSea && sea.isSea());
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PUBLIC = path.join(__dirname, "..", "public");
+// PUBLIC is only used in on-disk mode; in the exe import.meta.url is empty, so
+// guard fileURLToPath to avoid throwing at startup.
+let baseDir = ".";
+try { baseDir = path.dirname(fileURLToPath(import.meta.url)); } catch { /* SEA: unused */ }
+const PUBLIC = path.join(baseDir, "..", "public");
 const PORT = Number(process.env.PORT || process.argv[2] || 8787);
 
 const MIME = {

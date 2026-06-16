@@ -81,6 +81,17 @@ sidecar = 随包携带的 node 运行时（externalBin）+ src/、public/（reso
 
 注：`dist/` 与 `node_modules/` 已在 `.gitignore`，~80MB 的 exe 不入库；交付物在本机 `dist/` + 说明。
 
+**SEA 执行结果**：
+- B/C/D 完成：`server.mjs` 加 SEA 分支、`build-sea.mjs`+devDeps 就位、`npm run build:exe`
+  产出 `dist/CodexMonitor.exe`（87.4MB）。
+- 构建期踩坑已修：esbuild 转 CJS 后 `import.meta.url` 为空 → 原 `fileURLToPath(import.meta.url)`
+  会在 exe 启动即抛错。改为：CJS 里直接用 `require("node:sea")`、`fileURLToPath` 加 try 兜底。
+- E 冒烟通过（实跑 exe）：`/`200(内嵌 index，2240B 与磁盘一致)、`/style.css`200、
+  `/api/usage`200(真实数据 hostname=CBH、windows 全)、`/nope.txt`404。
+- 签名：postject「signature seems corrupted」仅提示；`Get-AuthenticodeSignature` 实测为
+  `NotSigned`（未签名，非被篡改）。对方双击会有 SmartScreen「未知发布者→仍要运行」，
+  与 README 既有的 macOS「身份不明开发者」同级，文档说明即可，本轮不做代码签名。
+
 ---
 
 ## 风险 / 待确认

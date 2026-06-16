@@ -72,12 +72,12 @@ sidecar = 随包携带的 node 运行时（externalBin）+ src/、public/（reso
 运行时检测 `sea.isSea()`：是 exe 就从内嵌 asset 取页面，否则（`npm start`）维持读磁盘 —— 浏览器开发模式不受影响。
 
 **SEA 步骤（每步 commit）**：
-- [ ] **A** 计划切到 SEA（本提交）
-- [ ] **B** `server.mjs` 加 SEA asset 服务分支（非 SEA 走原磁盘逻辑，零回归）
-- [ ] **C** `scripts/build-sea.mjs` 编排（esbuild bundle → sea-config → 生成 blob → 复制 node.exe → postject 注入）+ `package.json` devDeps/`build:exe`
-- [ ] **D** `npm i -D esbuild postject` + 跑构建出 `dist/CodexMonitor.exe`
-- [ ] **E** 冒烟测试：双击/运行 exe，确认起服务、嵌入页面能打开、`/api/usage` 出真实数据
-- [ ] **F** 更新 README（双击 exe、无需 Node）；macOS 同法出二进制（Mac 上跑同一脚本，`.dmg` 可选用 `hdiutil` 套壳）
+- [x] **A** 计划切到 SEA
+- [x] **B** `server.mjs` 加 SEA asset 服务分支（非 SEA 走原磁盘逻辑，零回归）
+- [x] **C** `scripts/build-sea.mjs` 编排 + `package.json` devDeps/`build:exe`
+- [x] **D** `npm i -D esbuild postject` + 跑构建出 `dist/CodexMonitor.exe`（87.4MB）
+- [x] **E** 冒烟测试通过（实跑 exe：内嵌页面 + 真实 `/api/usage`）
+- [x] **F** README 加打包/分发说明；`scripts/build-macos.sh`（Mac 上出 `.dmg`，本机未实测）
 
 注：`dist/` 与 `node_modules/` 已在 `.gitignore`，~80MB 的 exe 不入库；交付物在本机 `dist/` + 说明。
 

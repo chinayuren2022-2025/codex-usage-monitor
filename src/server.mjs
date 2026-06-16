@@ -7,8 +7,17 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import { loadAll, sessionsDir } from "./parse.mjs";
 import { aggregate } from "./aggregate.mjs";
+
+// When packaged as a single-file executable (Node SEA), the public/ assets are
+// embedded into the binary; otherwise (npm start) they are read from disk.
+// Load node:sea synchronously (no top-level await — this file is bundled to CJS
+// for the exe) and guard it so older Node without SEA still runs `npm start`.
+let sea = null;
+try { sea = createRequire(import.meta.url)("node:sea"); } catch { /* no SEA */ }
+const IS_SEA = !!(sea && sea.isSea && sea.isSea());
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(__dirname, "..", "public");
@@ -40,6 +49,23 @@ const server = http.createServer(async (req, res) => {
     }
 
     let rel = u.pathname === "/" ? "/index.html" : u.pathname;
+
+    // Packaged exe: serve from assets embedded in the binary. getAsset only
+    // resolves keys registered at build time, so path traversal is a non-issue.
+    if (IS_SEA) {
+      const key = path.posix.normalize(rel).replace(/^\/+/, "");
+      let buf = null;
+      try { buf = sea.getAsset(key); } catch { /* not an embedded asset */ }
+      if (buf) {
+        res.writeHead(200, { "content-type": MIME[path.extname(key)] || "application/octet-stream" });
+        res.end(Buffer.from(buf));
+      } else {
+        res.writeHead(404);
+        res.end("not found");
+      }
+      return;
+    }
+
     const fp = path.join(PUBLIC, path.normalize(rel).replace(/^(\.\.[\\/])+/, ""));
     if (!fp.startsWith(PUBLIC)) {
       res.writeHead(403);

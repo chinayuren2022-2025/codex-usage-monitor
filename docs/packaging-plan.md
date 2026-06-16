@@ -79,6 +79,16 @@ sidecar = 随包携带的 node 运行时（externalBin）+ src/、public/（reso
 - [x] **E** 冒烟测试通过（实跑 exe：内嵌页面 + 真实 `/api/usage`）
 - [x] **F** README 加打包/分发说明；`scripts/build-macos.sh`（Mac 上出 `.dmg`，本机未实测）
 
+**最终验证（采纳 advisor，补 3 项）**：
+- 隔离目录实测：把 `CodexMonitor.exe` 单独拷到空临时目录（无 `public/`/`src/`/`node_modules`）运行 →
+  `/`200(2240B 内嵌)、`/api/usage`200(真实数据，读 `~/.codex` 非 cwd) → 确证真自包含。
+- 浏览器自动打开路径已实跑（未设 `NO_OPEN`，弹出标签页 = 双击 UX）。
+- 末次 `server.mjs` 改动后回归 `npm start`(ESM)：`/`、`/api/usage`、`/style.css` 全 200，磁盘模式无回归。
+
+**遗留**：① 这是 SEA 浏览器-UI 兜底，**不是**用户选的 Tauri 原生窗口；要原生窗口只差 MSVC C++
+工作负载（用 VS Installer GUI 勾「使用 C++ 的桌面开发」最稳），装好即可回到 Tauri 路线。
+② 未代码签名（SmartScreen/Gatekeeper 首次放行一次）。③ macOS `.dmg` 脚本未在 Mac 实测。
+
 注：`dist/` 与 `node_modules/` 已在 `.gitignore`，~80MB 的 exe 不入库；交付物在本机 `dist/` + 说明。
 
 **SEA 执行结果**：

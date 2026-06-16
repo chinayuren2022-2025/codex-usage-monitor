@@ -78,3 +78,6 @@ sidecar = 随包携带的 node 运行时（externalBin）+ src/、public/（reso
 - 2026-06-16 — S0：计划成文并提交。
 - 2026-06-16 — 采纳 advisor：改为「先证明工具链再写集成」；sidecar 改用现有 `server.mjs`
   （`server.mjs`/`app.js` 不改）；SEA 列为 MSVC 装不动时的兜底。
+- 2026-06-16 — S1 探测：winget ✓；MSVC C++ Build Tools ✗（仅有 VS Installer 壳，无 VCTools
+  工作负载，`link.exe` 不在 PATH）；rustup ✗。MSVC 工作负载 ~3–5GB 且需管理员(UAC)，
+  会话内非交互 shell 无法可靠提权 → **S1 安装交由用户在本机执行**（见下方命令）。等待用户确认。

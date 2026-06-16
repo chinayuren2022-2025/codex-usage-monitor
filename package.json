@@ -10,10 +10,15 @@
     "start": "node src/server.mjs",
     "report": "node src/cli.mjs",
     "package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-package.ps1",
-    "package:export": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-export-package.ps1"
+    "package:export": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-export-package.ps1",
+    "build:exe": "node scripts/build-sea.mjs"
   },
   "engines": {
     "node": ">=20"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "postject": "^1.0.0-alpha.6"
+  }
 }

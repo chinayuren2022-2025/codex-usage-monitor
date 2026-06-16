@@ -20,7 +20,7 @@ if ! command -v node >/dev/null 2>&1; then
   echo
   echo "  After installing Node.js, double-click this file again."
   echo
-  read -r -p "  Press Return to close..."
+  printf "  Press Return to close..." && read -r _
   exit 1
 fi
 
@@ -28,4 +28,4 @@ node src/server.mjs
 
 echo
 echo "  Server stopped."
-read -r -p "  Press Return to close..."
+printf "  Press Return to close..." && read -r _

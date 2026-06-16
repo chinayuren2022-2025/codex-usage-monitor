@@ -20,7 +20,7 @@ if ! command -v node >/dev/null 2>&1; then
   echo
   echo "  After installing Node.js, double-click this file again."
   echo
-  read -r -p "  Press Return to close..."
+  printf "  Press Return to close..." && read -r _
   exit 1
 fi
 
@@ -32,4 +32,4 @@ echo
 node "$(dirname "$0")/export-send.mjs" "$@"
 
 echo
-read -r -p "  Press Return to close..."
+printf "  Press Return to close..." && read -r _

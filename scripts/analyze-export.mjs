@@ -183,9 +183,12 @@ if (warnings.length) {
 if (kRatio && planType === "pro") {
   const pool = kRatio * 100;
   const k5hRounded = Math.round(kRatio / 1000) * 1000;
+  // Group digits with "_" (a valid JS numeric separator), NOT "," — a comma
+  // would make the pasted literal parse as multiple args, e.g. w(7,700,000, …).
+  const jsNum = (n) => Math.round(n).toLocaleString("en-US").replace(/,/g, "_");
   console.log(`  ${C.green}${C.bold}For calibration.mjs — pro tier:${C.reset}`);
-  console.log(`  5h: w(${k5hRounded.toLocaleString("en-US")}, "validated")   // pool ~${fmt(pool)}`);
-  console.log(`  weekly: w(${Math.round(kWeekly).toLocaleString("en-US")}, "derived")          // unchanged`);
+  console.log(`  5h: w(${jsNum(k5hRounded)}, "validated")   // pool ~${fmt(pool)}`);
+  console.log(`  weekly: w(${jsNum(kWeekly)}, "derived")          // unchanged`);
   console.log("");
 }
 

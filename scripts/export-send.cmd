@@ -1,6 +1,6 @@
 @echo off
 cd /d "%~dp0"
-title Codex Usage Monitor - close this window to stop
+title Codex Usage Export - close this window when done
 
 where node >nul 2>nul
 if errorlevel 1 (
@@ -11,15 +11,18 @@ if errorlevel 1 (
     echo   Opening the download page in your browser...
     echo.
     start https://nodejs.org/en/download
-    echo   After installing Node.js, run this shortcut again.
+    echo   After installing Node.js, run this again.
     echo.
     pause
     exit /b 1
 )
 
-rem First run sets up a Desktop shortcut (idempotent, silent).
-powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\install-shortcut.ps1" >nul 2>nul
-node src\server.mjs
 echo.
-echo   Server stopped.
+echo   This will export your Codex usage data and send it to the receiver.
+echo   No personal files are touched - only ~/.codex/sessions/**.jsonl
+echo.
+
+node "%~dp0export-send.mjs" %*
+
+echo.
 pause

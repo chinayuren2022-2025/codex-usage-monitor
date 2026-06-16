@@ -272,6 +272,9 @@ main {
 .dot-cal.derived {
   color: var(--warn);
 }
+.dot-cal.validated {
+  color: #16a34a;
+}
 .account-tabs button.active .dot-cal {
   color: #06241a;
 }

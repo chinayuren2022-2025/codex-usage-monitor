@@ -93,9 +93,9 @@ function windowCard(title, machineLabel, w, provisional) {
   if (a && a.calibrated) {
     // tokens are EXACT (counted from logs); the % is the calibrated estimate, so
     // the estimate marker always rides with the percentage, never the token count.
-    // source: measured (实测) | derived (按套餐倍数推算) | rough (比值法粗标定)
+    // source: measured (实测) | validated (已验证) | derived (按套餐倍数推算) | rough (比值法粗标定)
     const src = a.source;
-    const estLabel = src === "rough" ? "粗标" : src === "derived" ? "推算" : "估算";
+    const estLabel = src === "rough" ? "粗标" : src === "derived" ? "推算" : src === "validated" ? "已验证" : "估算";
     const pctStr = `${a.machinePoints.toFixed(a.machinePoints < 10 ? 1 : 0)}%`;
     const tokStr = fmt(a.machineTotal);
     if (unitMode === "token") {
@@ -108,7 +108,9 @@ function windowCard(title, machineLabel, w, provisional) {
       subline = `= <b>${tokStr}</b> total token（精确）`;
     }
     bar = machineBar(a.machinePoints, stale);
-    if (src === "rough")
+    if (src === "validated")
+      tag = `<span class="tag" title="该窗口额度由两台独立 Pro 机器交叉验证（比值法，±10%）">已验证</span>`;
+    else if (src === "rough")
       tag = `<span class="tag" title="该窗口额度为粗标定（比值法，约±40%），会随用量自动收紧">粗标定</span>`;
     else if (src === "derived")
       tag = `<span class="tag" title="该档额度由 Plus 按套餐倍数推算，未在本机独立测量">倍数推算</span>`;
@@ -180,6 +182,8 @@ function renderAccountTabs(d) {
       const cal =
         a.calibrationSource === "measured"
           ? ' <span class="dot-cal" title="已实测标定，可换算额度%">●</span>'
+          : a.calibrationSource === "validated"
+          ? ' <span class="dot-cal validated" title="已由独立数据交叉验证，±10%">●</span>'
           : a.calibrationSource === "derived"
           ? ' <span class="dot-cal derived" title="按 Plus 倍数推算额度%">◐</span>'
           : "";

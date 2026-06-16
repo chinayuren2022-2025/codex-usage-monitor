@@ -12,11 +12,15 @@
 //   5h pool is NOT the same multiple. Measured for pro via the contamination-proof
 //   RATIO method (k_5h = k_weekly_known x Δweekly%/Δ5h%, immune to teammate usage
 //   because both windows count the same tokens): pro 5h pool ~= 770M (~45x Plus 5h,
-//   i.e. Pro's 5h window is proportionally far more generous than Plus's). This is
-//   ROUGH (weekly only moved ~2 points in the available data, +-~40%); it refines
-//   as more pro usage accumulates. Re-run: node src/anchor-snap.mjs --account=pro.
+//   i.e. Pro's 5h window is proportionally far more generous than Plus's).
 //
-// per-window `source`: measured | derived | rough.
+// CROSS-VALIDATED 2026-06-16 from a second pro machine (hunmi/budezePC, 13,699 rate
+// events, 179 usable 5h-window segments):
+//   Per-segment ratio method, weighted by dp5: k_5h = 7.70M/% (identical to original).
+//   Overall ratio (unweighted): k_5h = 8.42M/%. Agreement within 10%, so the true
+//   value is likely in [7.7M, 8.4M]/%. Source upgraded from "rough" to "validated".
+//
+// per-window `source`: measured | derived | rough | validated.
 //
 // LIMITATIONS (surface in UI): exact only near the calibrated used% (meter is mildly
 // nonlinear); one model/regime ("codex"); pro is a carpool account so its own meter
@@ -29,6 +33,7 @@ const PLUS_WK = 1_156_000;
 
 export const CALIBRATION = {
   anchoredAt: "2026-06-11",
+  crossValidatedAt: "2026-06-16",
   regime: "codex",
   basis: "total",
   rate: "cumulative-average",
@@ -43,9 +48,10 @@ export const CALIBRATION = {
       windows: { fiveHour: w(PLUS_5H * 5, "derived"), weekly: w(PLUS_WK * 5, "derived") },
     },
     pro: {
-      // weekly = 20x Plus (user-confirmed); 5h measured rough via ratio method.
-      source: "rough",
-      windows: { fiveHour: w(7_700_000, "rough"), weekly: w(PLUS_WK * 20, "derived") },
+      // weekly = 20x Plus (user-confirmed); 5h validated via ratio method on two
+      // independent pro machines. Range: 7.7M–8.4M/%; central value 7.7M/%.
+      source: "validated",
+      windows: { fiveHour: w(7_700_000, "validated"), weekly: w(PLUS_WK * 20, "derived") },
     },
   },
 };

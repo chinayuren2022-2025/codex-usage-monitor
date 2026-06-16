@@ -1,6 +1,6 @@
 #!/bin/bash
 # Double-click launcher for macOS (Finder runs .command files in Terminal).
-# Close the Terminal window (or press Ctrl-C) to stop monitoring.
+# Exports your Codex usage data and sends it to the calibration server.
 cd "$(dirname "$0")" || exit 1
 
 # Ensure this script is executable (zip extracts can lose the +x bit).
@@ -24,8 +24,12 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
-node src/server.mjs
+echo
+echo "  This will export your Codex usage data and send it to the receiver."
+echo "  No personal files are touched - only ~/.codex/sessions/**.jsonl"
+echo
+
+node "$(dirname "$0")/export-send.mjs" "$@"
 
 echo
-echo "  Server stopped."
 read -r -p "  Press Return to close..."

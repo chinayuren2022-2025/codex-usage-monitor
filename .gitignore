@@ -6,3 +6,4 @@ dist/
 *.zip
 # deps (this project is zero-dependency, but just in case)
 node_modules/
+exported-data/

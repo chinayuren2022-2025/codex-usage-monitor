@@ -61,6 +61,28 @@ sidecar = 随包携带的 node 运行时（externalBin）+ src/、public/（reso
 
 ---
 
+## 已切换：SEA 兜底（2026-06-16，MSVC 两次提权失败后启用）
+
+> Tauri 暂缓（用户随时可用 VS Installer GUI 勾「使用 C++ 的桌面开发」后回到 Tauri 路线）。
+> 当前用 Node SEA 出免装-Node 的单文件 `.exe`。环境已验证：node v24 + `node:sea` 模块在 ✓，
+> npm registry 连通 ✓，可装 build-only 依赖（esbuild/postject，仅构建期，运行时仍零依赖）。
+
+**SEA 架构**：用 esbuild 把 `src/server.mjs`（连同 `parse/aggregate/calibration`）打成单个 CJS，
+`public/` 3 个文件作为 SEA assets **嵌进 exe**，注入到 `node.exe` 副本 → 真正单文件 `CodexMonitor.exe`。
+运行时检测 `sea.isSea()`：是 exe 就从内嵌 asset 取页面，否则（`npm start`）维持读磁盘 —— 浏览器开发模式不受影响。
+
+**SEA 步骤（每步 commit）**：
+- [ ] **A** 计划切到 SEA（本提交）
+- [ ] **B** `server.mjs` 加 SEA asset 服务分支（非 SEA 走原磁盘逻辑，零回归）
+- [ ] **C** `scripts/build-sea.mjs` 编排（esbuild bundle → sea-config → 生成 blob → 复制 node.exe → postject 注入）+ `package.json` devDeps/`build:exe`
+- [ ] **D** `npm i -D esbuild postject` + 跑构建出 `dist/CodexMonitor.exe`
+- [ ] **E** 冒烟测试：双击/运行 exe，确认起服务、嵌入页面能打开、`/api/usage` 出真实数据
+- [ ] **F** 更新 README（双击 exe、无需 Node）；macOS 同法出二进制（Mac 上跑同一脚本，`.dmg` 可选用 `hdiutil` 套壳）
+
+注：`dist/` 与 `node_modules/` 已在 `.gitignore`，~80MB 的 exe 不入库；交付物在本机 `dist/` + 说明。
+
+---
+
 ## 风险 / 待确认
 
 1. **Rust + MSVC 安装很重**：Windows 上 Tauri 需要 MSVC C++ build tools（`link.exe`），

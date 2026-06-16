@@ -81,3 +81,6 @@ sidecar = 随包携带的 node 运行时（externalBin）+ src/、public/（reso
 - 2026-06-16 — S1 探测：winget ✓；MSVC C++ Build Tools ✗（仅有 VS Installer 壳，无 VCTools
   工作负载，`link.exe` 不在 PATH）；rustup ✗。MSVC 工作负载 ~3–5GB 且需管理员(UAC)，
   会话内非交互 shell 无法可靠提权 → **S1 安装交由用户在本机执行**（见下方命令）。等待用户确认。
+- 2026-06-16 — S1 首次安装退出码 1。读 VS 安装器日志确认：本次只是 VS Installer 自更新
+  （4.4→4.7）+ 注册服务，**VCTools 工作负载未真正安装**（vswhere 无实例、无 `link.exe`）。
+  属干净机器首装的「安装器自更新打架」，需用最新安装器**再跑一次**（这次才真正下 ~3–5GB）。

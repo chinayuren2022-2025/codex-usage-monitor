@@ -42,12 +42,41 @@ npm run report         # 不开网页，直接终端打印报表
 
 ## 分享给拼车队友
 
-把整个 `codex-usage-monitor` 文件夹拷给对方即可（每人看自己机器的用量）。
+两种方式，任选其一：
+
+**A. 免装 Node 的单文件应用（推荐发给非技术队友）**
+打成一个自带 Node 运行时的可执行文件，对方**完全不用装 Node**，双击即用：
+
+- **Windows**：发给对方 `CodexMonitor.exe`，双击运行（首次 SmartScreen 提示「未知发布者」→ **更多信息 → 仍要运行**，只需一次）。
+- **macOS**：发给对方 `CodexMonitor.dmg`，打开拖进「应用程序」，首次**右键 → 打开 → 打开**（只需一次，未公证）。
+
+怎么打这个包见下方 [打包成免装-Node 的 .exe / .dmg](#打包成免装-node-的-exe--dmg)。
+
+**B. 拷整个文件夹（需要对方有 Node）**
+把整个 `codex-usage-monitor` 文件夹拷给对方（每人看自己机器的用量）：
 
 - **Windows**：双击 `Start-Monitor.cmd`（首次会自己在桌面建快捷方式）。
 - **macOS**：双击 `Start-Monitor.command`（首次右键→打开授权一次；解压后若双击无反应，`chmod +x Start-Monitor.command`）。
 
 如果系统还没有 Node.js，双击启动器时会**自动打开 Node.js 下载页**，安装后重新双击即可。无需 `npm install`（零依赖）。
+
+## 打包成免装-Node 的 .exe / .dmg
+
+把应用连同 Node 运行时打成一个自包含可执行文件（基于 [Node SEA](https://nodejs.org/api/single-executable-applications.html)）。
+**只在打包这台机器上需要联网装一次 build 工具**（`esbuild` + `postject`，仅构建期用，运行时仍零依赖）；
+产出的 exe/app 给谁谁都不用装 Node。
+
+```bash
+npm install            # 一次性装 build 工具（写入 devDependencies）
+npm run build:exe      # 当前系统出包：Windows→dist/CodexMonitor.exe，macOS/Linux→dist/CodexMonitor
+```
+
+- **Windows `.exe`**：直接 `npm run build:exe`，得到 `dist/CodexMonitor.exe`（约 87MB，内嵌 `public/` 页面）。
+- **macOS `.dmg`**：在 **Mac 上**跑 `./scripts/build-macos.sh`，会构建二进制、包成 `CodexMonitor.app`、再封成 `dist/CodexMonitor.dmg`。
+  （该脚本在 Windows 上写就、未在 macOS 实测，会逐步 echo 并在出错处中止，方便排查。）
+
+> 跨系统说明：exe 只能在 Windows 上构建、dmg 只能在 macOS 上构建（各自的 Node 运行时不同），不能交叉打包。
+> 两种产物都**未做代码签名**，所以首次运行有「未知发布者 / 身份不明开发者」提示，按上面的一次性放行即可。
 
 ## 看什么
 

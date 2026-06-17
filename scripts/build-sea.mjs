@@ -23,6 +23,39 @@ fs.mkdirSync(seaDir, { recursive: true });
 
 const isWin = process.platform === "win32";
 const isMac = process.platform === "darwin";
+
+// Resolve a PORTABLE node binary to use as the SEA injection base.
+// Homebrew's `node` is a ~68KB launcher dynamically linked against
+// @rpath/libnode.dylib + a dozen /opt/homebrew dylibs — injecting into it
+// yields a binary that crashes on any Mac without that exact Homebrew setup.
+// SEA needs the official statically-linked node (only /usr/lib + system
+// frameworks). If the running node is already static (official/nvm install),
+// reuse it; otherwise download the matching official build and cache it.
+function resolveBaseNode() {
+  if (!isMac) return process.execPath; // win/linux official + nvm are static
+  let deps = "";
+  try { deps = execFileSync("otool", ["-L", process.execPath], { encoding: "utf8" }); } catch {}
+  if (!/libnode/.test(deps)) {
+    console.log("  base node: running binary is self-contained — reusing it");
+    return process.execPath;
+  }
+  const ver = process.version; // e.g. v25.9.0 — match exactly for SEA blob compat
+  const arch = process.arch === "arm64" ? "arm64" : "x64";
+  const name = `node-${ver}-darwin-${arch}`;
+  const cached = path.join(seaDir, name, "bin", "node");
+  if (fs.existsSync(cached)) {
+    console.log(`  base node: using cached official ${name}`);
+    return cached;
+  }
+  console.log(`  base node: running node is Homebrew/dynamic — downloading official ${name}`);
+  const url = `https://nodejs.org/dist/${ver}/${name}.tar.gz`;
+  const tgz = path.join(seaDir, `${name}.tar.gz`);
+  execFileSync("curl", ["-fsSL", "-o", tgz, url], { stdio: "inherit" });
+  execFileSync("tar", ["xzf", tgz, "-C", seaDir], { stdio: "inherit" });
+  if (!fs.existsSync(cached)) throw new Error(`official node not found after extract: ${cached}`);
+  return cached;
+}
+const baseNode = resolveBaseNode();
 const exeName = isWin ? "CodexMonitor.exe" : "CodexMonitor";
 const outExe = path.join(dist, exeName);
 const bundlePath = path.join(seaDir, "server.cjs");
@@ -68,9 +101,12 @@ console.log("  embedded assets:", Object.keys(assets).join(", "));
 step(3, "generating SEA blob");
 execFileSync(process.execPath, ["--experimental-sea-config", cfgPath], { stdio: "inherit", cwd: root });
 
-// 4. Copy the running Node binary as the base executable.
+// 4. Copy the portable Node binary as the base executable.
 step(4, `copying node runtime -> ${exeName}`);
-fs.copyFileSync(process.execPath, outExe);
+fs.rmSync(outExe, { force: true }); // prior run may have left a read-only copy
+fs.copyFileSync(baseNode, outExe);
+// Official node binaries are read-only (r-x); postject needs read+write.
+fs.chmodSync(outExe, 0o755);
 // macOS rejects a modified signed binary; strip the signature before injecting.
 if (isMac) {
   try { execFileSync("codesign", ["--remove-signature", outExe], { stdio: "inherit" }); } catch {}

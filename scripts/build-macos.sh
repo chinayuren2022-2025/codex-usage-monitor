@@ -10,8 +10,14 @@ set -eu
 cd "$(dirname "$0")/.."
 
 APPNAME="Codex Usage Monitor"
-APP="dist/CodexMonitor.app"
+# Assemble the .app in a NON-synced temp dir. If the repo lives under an
+# iCloud-synced folder (e.g. ~/Documents), the fileprovider keeps re-adding
+# com.apple.FinderInfo to the bundle root, which makes codesign reject it with
+# "...detritus not allowed". /var/folders ($TMPDIR) is local-only and immune.
+BUILD="$(mktemp -d)"
+APP="$BUILD/CodexMonitor.app"
 DMG="dist/CodexMonitor.dmg"
+trap 'rm -rf "$BUILD"' EXIT
 
 echo "[1/5] checking node (build-time only)…"
 command -v node >/dev/null 2>&1 || { echo "ERROR: Node.js is required to BUILD. Install: https://nodejs.org"; exit 1; }
@@ -59,8 +65,17 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>LSMinimumSystemVersion</key><string>11.0</string>
 </dict></plist>
 PLIST
+# Strip extended attributes (resource forks / Finder info) that make codesign
+# reject the bundle with "...detritus not allowed". sips/iconutil & Finder add
+# these. On Apple Silicon an unsigned .app is killed on launch, so this matters.
+xattr -cr "$APP"
 # Ad-hoc sign so Gatekeeper will run it locally (not notarized — see note below).
-codesign --force --deep --sign - "$APP" || echo "WARN: codesign failed; app may need right-click → Open."
+# Sign the inner binary first, then the bundle (no --deep; it's deprecated).
+codesign --force --sign - "$APP/Contents/MacOS/CodexMonitor"
+codesign --force --sign - "$APP" || echo "WARN: codesign failed; app may need right-click → Open."
+# Fail loud if the bundle did not end up validly signed — a silent unsigned .app
+# crashes on every other Mac.
+codesign --verify --strict "$APP" && echo "      codesign OK (ad-hoc)" || echo "WARN: signature did not verify"
 
 echo "[5/5] creating ${DMG}…"
 rm -f "$DMG"

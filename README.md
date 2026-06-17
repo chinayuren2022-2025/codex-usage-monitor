@@ -5,95 +5,29 @@
 
 零依赖，纯 Node 内置模块。数据来源：`~/.codex/sessions/**/*.jsonl`（Codex 自己写的会话日志）。
 
-## 点击即用（Windows）
+## 下载即用（不用装 Node）
 
-双击桌面的 **「Codex Usage Monitor」** 快捷方式，或项目里的 **`Start-Monitor.cmd`**。
-会自动选一个空闲端口启动、自动打开浏览器。**关掉那个黑色窗口就停止监控**。
-（快捷方式名用英文是为了跨机器不乱码；网页界面仍是中文。）
+去 [**Releases**](https://github.com/chinayuren2022-2025/codex-usage-monitor/releases/latest) 下载，双击运行，自动开浏览器。**关掉那个窗口就停止监控**。
 
-快捷方式若丢了，重新生成：
+| 平台 | 下载 | 首次打开 |
+|------|------|----------|
+| macOS | `CodexMonitor.dmg` → 拖进「应用程序」 | 右键 → **打开** → **打开**（一次） |
+| Windows | `CodexMonitor.exe` | SmartScreen 提示 → **更多信息 → 仍要运行**（一次） |
 
-```powershell
-powershell -NoProfile -File "scripts\install-shortcut.ps1"
-```
+> 首次的额外一步是因为没做苹果/微软的付费签名，**不是有问题**，放行一次以后就正常双击。介意的话可下载同一 Release 里的 `SHA256SUMS.txt` 核对完整性（`shasum -a 256 -c SHA256SUMS.txt`）。
 
-## 点击即用（macOS）
-
-双击 **`Start-Monitor.command`**，会弹一个终端窗口、自动选空闲端口启动并打开浏览器。
-**关掉那个终端窗口（或按 Ctrl-C）就停止监控**。
-
-- 第一次双击若报「未识别的开发者」/「无法打开」：右键点它 → **打开** → 在弹窗里再点**打开**（只需一次）。
-- 如果双击没反应（可执行位丢了，常见于解压 zip 后），在终端里跑一次即可恢复：
-  ```bash
-  chmod +x Start-Monitor.command
-  ```
-  或者直接 `bash Start-Monitor.command` 运行。
-
-## 命令行运行
+## 从源码运行（你自己有 Node）
 
 ```bash
-npm start              # 启动网页并自动打开浏览器（端口被占会自动顺延）
+npm start              # 启动网页并自动打开浏览器（端口被占自动顺延）
 PORT=9000 npm start    # 指定起始端口
 NO_OPEN=1 npm start    # 不自动开浏览器
 npm run report         # 不开网页，直接终端打印报表
 ```
 
-页面每 15 秒自动刷新。
+零依赖、无需 `npm install`。页面每 15 秒自动刷新。也可以双击启动器：Windows `Start-Monitor.cmd`、macOS `Start-Monitor.command`（首次右键→打开授权一次；若双击无反应跑一次 `chmod +x Start-Monitor.command`）。没装 Node 时启动器会自动打开 Node.js 下载页。
 
-## 分享给拼车队友
-
-两种方式，任选其一：
-
-**A. 免装 Node 的单文件应用（推荐发给非技术队友）**
-打成一个自带 Node 运行时的可执行文件，对方**完全不用装 Node**，双击即用：
-
-- **Windows**：发给对方 `CodexMonitor.exe`，双击运行（首次 SmartScreen 提示「未知发布者」→ **更多信息 → 仍要运行**，只需一次）。
-- **macOS**：发给对方 `CodexMonitor.dmg`，打开拖进「应用程序」，首次**右键 → 打开 → 打开**（只需一次，未公证）。
-
-怎么打这个包见下方 [打包成免装-Node 的 .exe / .dmg](#打包成免装-node-的-exe--dmg)。
-
-**B. 拷整个文件夹（需要对方有 Node）**
-把整个 `codex-usage-monitor` 文件夹拷给对方（每人看自己机器的用量）：
-
-- **Windows**：双击 `Start-Monitor.cmd`（首次会自己在桌面建快捷方式）。
-- **macOS**：双击 `Start-Monitor.command`（首次右键→打开授权一次；解压后若双击无反应，`chmod +x Start-Monitor.command`）。
-
-如果系统还没有 Node.js，双击启动器时会**自动打开 Node.js 下载页**，安装后重新双击即可。无需 `npm install`（零依赖）。
-
-## 打包成免装-Node 的 .exe / .dmg
-
-把应用连同 Node 运行时打成一个自包含可执行文件（基于 [Node SEA](https://nodejs.org/api/single-executable-applications.html)）。
-**只在打包这台机器上需要联网装一次 build 工具**（`esbuild` + `postject`，仅构建期用，运行时仍零依赖）；
-产出的 exe/app 给谁谁都不用装 Node。
-
-```bash
-npm install            # 一次性装 build 工具（写入 devDependencies）
-npm run build:exe      # 当前系统出包：Windows→dist/CodexMonitor.exe，macOS/Linux→dist/CodexMonitor
-```
-
-- **Windows `.exe`**：直接 `npm run build:exe`，得到 `dist/CodexMonitor.exe`（约 87MB，内嵌 `public/` 页面）。
-- **macOS `.dmg`**：在 **Mac 上**跑 `./scripts/build-macos.sh`，会构建二进制、包成 `CodexMonitor.app`（ad-hoc 签名）、再封成 `dist/CodexMonitor.dmg`（约 47MB）。已在 Apple Silicon 实测：DMG 挂载 → 拷出 app → 启动 → 出页面全程通过。
-  - 若你用 **Homebrew 装的 node**（它是动态链接 `libnode.dylib` 的小启动器，注入后在别人机器上会崩），脚本会自动下载**官方静态 node** 作打包基底（缓存在 `dist/sea/`，仅依赖系统库，真正可移植）。首次构建需联网拉一次。
-  - 脚本在**非 iCloud 同步目录**（`$TMPDIR`）里组装 `.app` 再签名，避免 iCloud 给 bundle 加 `com.apple.FinderInfo` 导致 codesign 失败。
-
-> 跨系统说明：exe 只能在 Windows 上构建、dmg 只能在 macOS 上构建（各自的 Node 运行时不同），不能交叉打包。
-> 两种产物都**只做 ad-hoc 签名、未公证（notarize）**，所以首次运行有「未知发布者 / 身份不明开发者」提示，按上面的一次性放行即可。要做到双击零提示需 Apple Developer 账号（$99/年）+ `xcrun notarytool` 公证，本项目未做。
-
-## 下载与校验（GitHub Release）
-
-不想自己打包，可直接从 [Releases](https://github.com/chinayuren2022-2025/codex-usage-monitor/releases) 下载：
-
-- macOS：`CodexMonitor.dmg`
-- Windows：`CodexMonitor.exe`
-
-因为产物**未公证**，下载后建议先核对 SHA-256（每个 Release 附 `SHA256SUMS.txt`）：
-
-```bash
-# macOS
-shasum -a 256 -c SHA256SUMS.txt
-# Windows (PowerShell)
-Get-FileHash CodexMonitor.exe -Algorithm SHA256
-```
+> 想自己打包成上面那种免装-Node 的 exe / dmg，见 [docs/PACKAGING.md](docs/PACKAGING.md)。
 
 ## 看什么
 

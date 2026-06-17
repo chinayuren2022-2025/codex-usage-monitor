@@ -72,11 +72,28 @@ npm run build:exe      # 当前系统出包：Windows→dist/CodexMonitor.exe，
 ```
 
 - **Windows `.exe`**：直接 `npm run build:exe`，得到 `dist/CodexMonitor.exe`（约 87MB，内嵌 `public/` 页面）。
-- **macOS `.dmg`**：在 **Mac 上**跑 `./scripts/build-macos.sh`，会构建二进制、包成 `CodexMonitor.app`、再封成 `dist/CodexMonitor.dmg`。
-  （该脚本在 Windows 上写就、未在 macOS 实测，会逐步 echo 并在出错处中止，方便排查。）
+- **macOS `.dmg`**：在 **Mac 上**跑 `./scripts/build-macos.sh`，会构建二进制、包成 `CodexMonitor.app`（ad-hoc 签名）、再封成 `dist/CodexMonitor.dmg`（约 47MB）。已在 Apple Silicon 实测：DMG 挂载 → 拷出 app → 启动 → 出页面全程通过。
+  - 若你用 **Homebrew 装的 node**（它是动态链接 `libnode.dylib` 的小启动器，注入后在别人机器上会崩），脚本会自动下载**官方静态 node** 作打包基底（缓存在 `dist/sea/`，仅依赖系统库，真正可移植）。首次构建需联网拉一次。
+  - 脚本在**非 iCloud 同步目录**（`$TMPDIR`）里组装 `.app` 再签名，避免 iCloud 给 bundle 加 `com.apple.FinderInfo` 导致 codesign 失败。
 
 > 跨系统说明：exe 只能在 Windows 上构建、dmg 只能在 macOS 上构建（各自的 Node 运行时不同），不能交叉打包。
-> 两种产物都**未做代码签名**，所以首次运行有「未知发布者 / 身份不明开发者」提示，按上面的一次性放行即可。
+> 两种产物都**只做 ad-hoc 签名、未公证（notarize）**，所以首次运行有「未知发布者 / 身份不明开发者」提示，按上面的一次性放行即可。要做到双击零提示需 Apple Developer 账号（$99/年）+ `xcrun notarytool` 公证，本项目未做。
+
+## 下载与校验（GitHub Release）
+
+不想自己打包，可直接从 [Releases](https://github.com/chinayuren2022-2025/codex-usage-monitor/releases) 下载：
+
+- macOS：`CodexMonitor.dmg`
+- Windows：`CodexMonitor.exe`
+
+因为产物**未公证**，下载后建议先核对 SHA-256（每个 Release 附 `SHA256SUMS.txt`）：
+
+```bash
+# macOS
+shasum -a 256 -c SHA256SUMS.txt
+# Windows (PowerShell)
+Get-FileHash CodexMonitor.exe -Algorithm SHA256
+```
 
 ## 看什么
 
